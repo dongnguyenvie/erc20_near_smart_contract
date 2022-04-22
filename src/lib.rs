@@ -58,40 +58,47 @@ impl NolanToken {
 
     pub fn transfer(&mut self, recipient: AccountId, amount: U128) {
         let sender = env::signer_account_id();
-        if let Some(balance_of_sender) = self._balances.get_mut(&sender) {
+        self._balances.entry(sender.to_string()).or_insert(U128(0));
+        self._balances
+            .entry(recipient.to_string())
+            .or_insert(U128(0));
+        if let Some(balance_of_sender) = self._balances.get(&sender) {
             if balance_of_sender.0 < amount.0 {
-                env::log("out of amount".as_bytes());
-                if let Some(x) = self._balances.get_mut(&recipient) {
+                env::log("Out of amount".as_bytes());
+                let mut temp_recipient = U128(0);
+                let mut temp_sender = U128(0);
+                if let Some(balance_of_recipient) = self._balances.get(&recipient) {
                     // transfer
-                    *balance_of_sender = U128(balance_of_sender.0 - amount.0);
-                    *x = U128(x.0 + amount.0);
+                    temp_sender = U128(balance_of_sender.0 - amount.0);
+                    temp_recipient = U128(balance_of_recipient.0 + amount.0);
+
+                    self._balances.insert(sender, temp_sender);
+                    self._balances.insert(recipient, temp_recipient);
+
+                    env::log("Transfer successfully".as_bytes());
                 } else {
-                    // *balance_of_sender = U128(balance_of_sender.0 - amount.0);
+                    env::log("Transfer faily".as_bytes());
                 };
-                // recipient
-                // self._balances.insert(k, v)
+            }
+        } else {
+            env::log("U should deposit token first".as_bytes());
+        }
+    }
+
+    pub fn mint_by_owner(&mut self, recipient: AccountId, amount: U128) {
+        let sender = env::signer_account_id();
+        match sender == self._owner_id {
+            true => {
+                self._balances
+                    .entry(recipient.to_string())
+                    .or_insert(U128(0));
+                self._total_supply = U128(self._total_supply.0 + amount.0);
+                self._balances.insert(recipient.to_string(), amount);
+                env::log("Mint successfully".as_bytes());
+            }
+            false => {
+                env::log("U are not owner".as_bytes());
             }
         }
-        // match self._balances.get(&sender) {
-        //     Some(balance) => {
-        //         if balance.0 < amount.0 {
-        //             env::log("out of amount".as_bytes());
-        //             return
-        //             if let Some(x) = self._balances.get_mut(&recipient) {
-        //                 // transfer
-
-        //                 *x = U128(x.0 + amount.0);
-        //             } else {
-
-        //             }
-        //             // recipient
-        //             // self._balances.insert(k, v)
-        //         }
-        //     },
-        //     None => {
-        //         env::log("out of amount".as_bytes());
-        //         return
-        //     },
-        // }
     }
 }
