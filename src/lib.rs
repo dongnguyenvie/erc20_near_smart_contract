@@ -49,7 +49,7 @@ impl NolanToken {
         self._total_supply
     }
 
-    pub fn balance_of(&self, account: AccountId) -> U128 {
+    pub fn balance_of(self, account: AccountId) -> U128 {
         match self._balances.get(&account) {
             Some(amount) => amount.clone(),
             None => U128(0),
@@ -98,6 +98,38 @@ impl NolanToken {
             }
             false => {
                 env::log("U are not owner".as_bytes());
+            }
+        }
+    }
+
+    // pub fn transfer_from(&mut self, recipient: AccountId, amount: U128) {
+    //     let sender = env::signer_account_id();
+
+    // }
+
+    pub fn allowance(mut self, owner: AccountId, spender: AccountId) -> U128 {
+        match self._allowances.get(&owner) {
+            Some(sender_allowances) => match sender_allowances.get(&spender) {
+                Some(amount) => *amount,
+                None => U128(0),
+            },
+            None => U128(0),
+        }
+    }
+
+    pub fn approve(&mut self, spender: AccountId, amount: U128) {
+        let sender = env::signer_account_id();
+        self._allowances
+            .entry(sender.to_string())
+            .or_insert(HashMap::new());
+        if let Some(sender_allowances) = self._allowances.get_mut(&sender) {
+            match sender_allowances.insert(spender, amount) {
+                Some(_) => {
+                    println!("Approve successfully");
+                }
+                None => {
+                    println!("Approve failly");
+                }
             }
         }
     }
