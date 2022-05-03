@@ -49,7 +49,7 @@ impl NolanToken {
         self._total_supply
     }
 
-    pub fn balance_of(&self, account: AccountId) -> U128 {
+    pub fn balance_of(self, account: AccountId) -> U128 {
         match self._balances.get(&account) {
             Some(amount) => amount.clone(),
             None => U128(0),
@@ -98,6 +98,62 @@ impl NolanToken {
             }
             false => {
                 env::log("U are not owner".as_bytes());
+            }
+        }
+    }
+
+    pub fn transfer_from(&mut self, sender: AccountId, recipient: AccountId, amount: U128) {
+        let spender = env::signer_account_id();
+        let sender_clone = sender.clone();
+        let price_allowed = self.allowance(sender, spender);
+        if price_allowed.0 >= amount.0 {
+            if let Some(balance_of_sender) = self._balances.get(&sender_clone) {
+                if balance_of_sender.0 < amount.0 {
+                    env::log("Out of amount".as_bytes());
+                    let mut temp_recipient = U128(0);
+                    let mut temp_sender = U128(0);
+                    if let Some(balance_of_recipient) = self._balances.get(&recipient) {
+                        // transfer
+                        temp_sender = U128(balance_of_sender.0 - amount.0);
+                        temp_recipient = U128(balance_of_recipient.0 + amount.0);
+
+                        self._balances.insert(sender_clone, temp_sender);
+                        self._balances.insert(recipient, temp_recipient);
+
+                        env::log("Transfer successfully".as_bytes());
+                    } else {
+                        env::log("Transfer faily".as_bytes());
+                    };
+                }
+            } else {
+                env::log("U can't transfer money".as_bytes());
+            }
+        }
+    }
+
+    pub fn allowance(&self, owner: AccountId, spender: AccountId) -> U128 {
+        match self._allowances.get(&owner) {
+            Some(sender_allowances) => match sender_allowances.get(&spender) {
+                Some(amount) => *amount,
+                None => U128(0),
+            },
+            None => U128(0),
+        }
+    }
+
+    pub fn approve(&mut self, spender: AccountId, amount: U128) {
+        let sender = env::signer_account_id();
+        self._allowances
+            .entry(sender.to_string())
+            .or_insert(HashMap::new());
+        if let Some(sender_allowances) = self._allowances.get_mut(&sender) {
+            match sender_allowances.insert(spender, amount) {
+                Some(_) => {
+                    println!("Approve successfully");
+                }
+                None => {
+                    println!("Approve failly");
+                }
             }
         }
     }
