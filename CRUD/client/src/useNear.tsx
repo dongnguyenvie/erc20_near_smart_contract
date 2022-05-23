@@ -3,6 +3,10 @@ import { useEffect, useMemo, useState } from "react";
 // import { useLocation, useSearchParams } from "react-router-dom";
 import { CURDContract } from "./types";
 
+// connect network
+// connect wallet
+// connect contract
+
 const nearConfig: nearAPI.ConnectConfig = {
   networkId: "testnet",
   nodeUrl: "https://rpc.testnet.near.org",
