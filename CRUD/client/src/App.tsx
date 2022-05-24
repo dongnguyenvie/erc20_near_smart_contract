@@ -65,38 +65,47 @@ function App() {
           <p>balance: {profile?.balance}</p>
         </header>
       )}
-      <hr />
-      <input type="text" value={key} onChange={changeKey} placeholder="key" />
-      <input
-        type="text"
-        value={value}
-        onChange={changeValue}
-        placeholder="value"
-      />
-      <button onClick={submit}>Create</button>
-      <hr />
-      <div className="table">
-        <h2>HashMap CRUD</h2>
+      {!!profile && (
+        <>
+          <hr />
+          <input
+            type="text"
+            value={key}
+            onChange={changeKey}
+            placeholder="key"
+          />
+          <input
+            type="text"
+            value={value}
+            onChange={changeValue}
+            placeholder="value"
+          />
+          <button onClick={submit}>Create</button>
+          <hr />
+          <div className="table">
+            <h2>HashMap CRUD</h2>
 
-        <table>
-          <tbody>
-            <tr>
-              <th>Key</th>
-              <th>Value</th>
-              <th>Action</th>
-            </tr>
-            {map.map((pair, idx) => (
-              <tr key={idx}>
-                <td>{pair[0]}</td>
-                <td>{pair[1]}</td>
-                <td>
-                  <button onClick={() => deleteKey(pair[0])}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            <table>
+              <tbody>
+                <tr>
+                  <th>Key</th>
+                  <th>Value</th>
+                  <th>Action</th>
+                </tr>
+                {map.map((pair, idx) => (
+                  <tr key={idx}>
+                    <td>{pair[0]}</td>
+                    <td>{pair[1]}</td>
+                    <td>
+                      <button onClick={() => deleteKey(pair[0])}>Delete</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
+      )}
     </div>
   );
 }
